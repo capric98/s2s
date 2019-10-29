@@ -92,15 +92,18 @@ def use(result, f0, f1):
             if p!=0 and len(word["text"])-count<0:
                 p-=1
                 count-=len(sentences[p])
-            if p>=len(section["log"]):
-                p = len(section["log"])-1
-            if len(word["text"])-count>len(sentences[p]):
-                tmp = "Dialogue: 0,"+totimecode(lastlog)+","+totimecode(word["timestamp"])+",Default,,0,0,0,,"
-                tmp += arrangeline(trans[p])+"\\N"
-                tmp += arrangeline(sentences[p][:len(word["text"])-count])
-                lastlog = word["timestamp"]
-                print(tmp,file=f1)
-                count+=len(sentences[p])
-                p+=1
-            substr+=arrangeline(trans[p])+"\\N"
-            print(substr+arrangeline(sentences[p][:len(word["text"])-count]),file=f0)
+            if p>=len(sentences):
+                p = len(sentences)-1
+            try:
+                if len(word["text"])-count>len(sentences[p]):
+                    tmp = "Dialogue: 0,"+totimecode(lastlog)+","+totimecode(word["timestamp"])+",Default,,0,0,0,,"
+                    tmp += arrangeline(trans[p])+"\\N"
+                    tmp += arrangeline(sentences[p][:len(word["text"])-count])
+                    lastlog = word["timestamp"]
+                    print(tmp,file=f1)
+                    count+=len(sentences[p])
+                    p+=1
+                substr+=arrangeline(trans[p])+"\\N"
+                print(substr+arrangeline(sentences[p][:len(word["text"])-count]),file=f0)
+            except Exception as e:
+                print(e)
