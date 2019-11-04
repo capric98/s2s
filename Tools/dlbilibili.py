@@ -20,7 +20,6 @@ def download(info, aurl, filename):
         subprocess.run([ffmpeg_path, "-i", filename+".v", "-i", filename+".a", "-acodec", "copy", "-vcodec", "copy", filename+".mp4"],stdout=sys.stdout, stderr=sys.stderr)
         os.remove(filename+".v")
         os.remove(filename+".a")
-        
 
 
 if __name__ == "__main__":
