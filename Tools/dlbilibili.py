@@ -34,6 +34,8 @@ if __name__ == "__main__":
     if args.cookie_file != "":
         with open(args.cookie_file, "r") as f:
             cookie = f.read()
+            if cookie[-1]=="\n":
+                cookie=cookie[:-1]
             client.headers.update({"Cookie": cookie})
 
     if args.code[:2]=="av":
