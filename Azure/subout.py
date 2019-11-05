@@ -50,7 +50,7 @@ def totimecode(timestamp):
     tc = [int(timestamp*100)%100,0,0,0]
     if timestamp>60*60*24:
         print("Duration too long!")
-        return
+        return ""
     timestamp = int(timestamp)
 
     while timestamp>=60:
@@ -97,7 +97,7 @@ def use(result, f0, f1):
             try:
                 if len(word["text"])-count>len(sentences[p]):
                     tmp = "Dialogue: 0,"+totimecode(lastlog)+","+totimecode(word["timestamp"])+",Default,,0,0,0,,"
-                    tmp += arrangeline(trans[p])+"\\N"
+                    #tmp += arrangeline(trans[p])+"\\N"
                     tmp += arrangeline(sentences[p][:len(word["text"])-count])
                     lastlog = word["timestamp"]
                     print(tmp,file=f1)
