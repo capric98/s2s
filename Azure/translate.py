@@ -40,5 +40,9 @@ def translate(qstr):
 def translate_list(sentences):
     result = []
     for s in sentences:
-        result.append(translate(s))
+        try:
+            tmp = translate(s)
+        except:
+            tmp = ""
+        result.append(tmp)
     return result
