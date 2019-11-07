@@ -21,6 +21,9 @@ def download(info, aurl, filename):
         os.remove(filename+".v")
         os.remove(filename+".a")
 
+def to_valid_name(str):
+    invalid = '''\/:*?"<>| ;'''
+    return "".join(c for c in str if c not in invalid)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="A bilibili download tool.")
@@ -79,4 +82,4 @@ if __name__ == "__main__":
     video_info = dash["video"]
     audio_info = dash["audio"]
     dinfo = [video_info[0], audio_info[0]]
-    download(dinfo, url, filename)
+    download(dinfo, url, to_valid_name(filename))
