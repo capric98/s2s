@@ -46,6 +46,8 @@ def cut(text):
     return result
 
 def totimecode(timestamp):
+    if timestamp<0:
+        timestamp = 0
     p = 1
     tc = [int(timestamp*100)%100,0,0,0]
     if timestamp>60*60*24:
@@ -83,27 +85,42 @@ def use(result, f0, f1):
 
         p = 0
         count = 0
-        lastlog = section["offset"]
+        lasttime = section["offset"]
+        nexttime = 0x7FFFFFFF
+
         for i in range(len(section["log"])):
             word = section["log"][i]
+
+            if word["timestamp"]<lasttime:
+                continue
             nexttime = word["timestamp"]+0.5 if i+1==len(section["log"]) else section["log"][i+1]["timestamp"]
-            substr = "Dialogue: 0,"+totimecode(word["timestamp"]-0.2)+","+totimecode(nexttime-0.2)+",Default,,0,0,0,,"
-            
-            if p!=0 and len(word["text"])-count<0:
-                p-=1
-                count-=len(sentences[p])
-            if p>=len(sentences):
-                p = len(sentences)-1
-            try:
-                if len(word["text"])-count>len(sentences[p]):
-                    tmp = "Dialogue: 0,"+totimecode(lastlog)+","+totimecode(word["timestamp"])+",Default,,0,0,0,,"
-                    #tmp += arrangeline(trans[p])+"\\N"
-                    tmp += arrangeline(sentences[p][:len(word["text"])-count])
-                    lastlog = word["timestamp"]
-                    print(tmp,file=f1)
-                    count+=len(sentences[p])
-                    p+=1
-                substr+=arrangeline(trans[p])+"\\N"
-                print(substr+arrangeline(sentences[p][:len(word["text"])-count]),file=f0)
-            except Exception as e:
-                print(e)
+
+            thistime = lasttime
+            totime = nexttime
+
+            if thistime>totime:
+                continue
+            lasttime = totime
+
+            thistime = totimecode(thistime-0.2)
+            totime = totimecode(totime-0.2)
+            if thistime and totime:
+                substr = "Dialogue: 0,"+thistime+","+totime+",Default,,0,0,0,,"
+                
+                if p!=0 and len(word["text"])-count<0:
+                    p-=1
+                    count-=len(sentences[p])
+                if p>=len(sentences):
+                    p = len(sentences)-1
+                try:
+                    if len(word["text"])-count>len(sentences[p]):
+                        #tmp = "Dialogue: 0,"+totimecode(lastlog)+","+totimecode(word["timestamp"])+",Default,,0,0,0,,"
+                        #tmp += arrangeline(trans[p])+"\\N"
+                        substr += arrangeline(sentences[p][:len(word["text"])-count])
+                        count+=len(sentences[p])
+                        p+=1
+                    else:
+                        substr+=arrangeline(trans[p])+"\\N"
+                    print(substr+arrangeline(sentences[p][:len(word["text"])-count]),file=f0)
+                except Exception as e:
+                    print(e)
