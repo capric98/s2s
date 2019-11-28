@@ -100,6 +100,8 @@ def use(result, f0, f1):
 
             if thistime>totime:
                 continue
+            if totime>24*60*60:
+                continue
             lasttime = totime
 
             thistime = totimecode(thistime-0.2)
