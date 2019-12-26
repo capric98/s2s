@@ -108,23 +108,6 @@ func download(cookie string, id string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go func() {
-		t := time.NewTicker(time.Second)
-		defer t.Stop()
-		defer fmt.Print("\n")
-		for {
-			select {
-			case <-t.C:
-				c.mu.Lock()
-				fmt.Print("\rFinish:", addUnit(c.done), "/", addUnit(c.total), " Speed:", addUnit(c.done-c.last), "/s")
-				c.last = c.done
-				c.mu.Unlock()
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-
 	var url, referer, filename string
 	var part int
 	var aresp BiliAPI
@@ -137,8 +120,9 @@ func download(cookie string, id string) {
 		aid := id[2:]
 		if strings.Contains(aid, "?") {
 			aid = aid[:strings.Index(aid, "?")]
+			part, _ = strconv.Atoi(id[strings.Index(id, "?")+3:])
 		}
-		part, _ = strconv.Atoi(id[strings.Index(id, "?")+3:])
+
 		if part != 0 {
 			part = part - 1
 		}
@@ -200,10 +184,10 @@ func download(cookie string, id string) {
 	}
 	if aresp.Result.DUrl != nil {
 		durls = aresp.Result.DUrl
-		filename += "." + aresp.Result.Type
+		filename += "." + toFormat(aresp.Result.Type)
 	} else {
 		durls = aresp.Data.DUrl
-		filename += "." + aresp.Data.Format
+		filename += "." + toFormat(aresp.Data.Format)
 	}
 
 	var maxDurl DUrl
@@ -218,6 +202,23 @@ func download(cookie string, id string) {
 	url = maxDurl.Url
 	c.AddTask(max)
 	log.Println("Downloading:", filename)
+
+	go func() {
+		t := time.NewTicker(time.Second)
+		defer t.Stop()
+		defer fmt.Print("\n")
+		for {
+			select {
+			case <-t.C:
+				c.mu.Lock()
+				fmt.Print("\rFinish:", addUnit(c.done), "/", addUnit(c.total), " Speed:", addUnit(c.done-c.last), "/s")
+				c.last = c.done
+				c.mu.Unlock()
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
 
 	multiThreadDown(url, referer, filename, c)
 }
@@ -338,4 +339,15 @@ func NameRegularize(name string) string {
 		name = name[:255]
 	}
 	return name
+}
+
+func toFormat(s string) string {
+	switch {
+	case strings.Contains(s, "flv"), strings.Contains(s, "FLV"), strings.Contains(s, "Flv"):
+		return "flv"
+	// case strings.Contains(s, "mp4"), strings.Contains(s, "MP4"), strings.Contains(s, "m4a"), strings.Contains(s, "M4a"), strings.Contains(s, "M4A"):
+	// 	return "mp4"
+	default:
+		return "mp4"
+	}
 }
