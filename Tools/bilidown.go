@@ -62,9 +62,13 @@ func main() {
 	flag.Parse()
 
 	cookie, _ := ioutil.ReadFile(*ck)
+	sc := string(cookie)
+	for sc[len(sc)-1] == '\n' {
+		sc = sc[:len(sc)-1]
+	}
 
 	for _, v := range flag.Args() {
-		download(string(cookie), v)
+		download(sc, v)
 	}
 
 }
