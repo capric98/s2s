@@ -34,6 +34,7 @@ def translate(qstr):
         "signType": "v3",
         "curtime": curtime
     }
+    #print(payload)
     resp = requests.post("https://openapi.youdao.com/api", data=payload, headers={'Content-Type': 'application/x-www-form-urlencoded'})
     return resp.json()["translation"][0]
 
