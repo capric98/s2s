@@ -19,7 +19,7 @@ type Buk struct {
 	timeout time.Duration
 }
 
-func NewBuk(bukname, projectID string) (b *Buk, e error) {
+func OpenBuk(bukname, projectID string) (b *Buk, e error) {
 	// Init client.
 	b = &Buk{
 		name:      bukname,
@@ -37,10 +37,16 @@ func NewBuk(bukname, projectID string) (b *Buk, e error) {
 	defer cancel()
 	it := b.client.Bucket(bukname).Objects(tctx, nil)
 	if _, e = it.Next(); e == storage.ErrBucketNotExist {
-		e = b.create()
+		return b, b.create()
 	}
 
+	e = nil
 	return
+}
+
+func (b *Buk) Close() error {
+	b.cancel()
+	return b.client.Close()
 }
 
 func (b *Buk) Upload(obj string, r io.Reader) (e error) {
