@@ -63,5 +63,6 @@ func main() {
 		log.Panicln("Upload bucket:", err)
 	}
 
-	_ = s2s.Recognize("gs://"+*bucketName+"/"+task, *gcpLan, 3)
+	r, _ := s2s.Recognize("gs://"+*bucketName+"/"+task, *gcpLan, 0)
+	log.Println(s2s.OutputSubtitle(r, "test.ass", true, false))
 }

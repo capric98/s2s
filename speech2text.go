@@ -2,7 +2,6 @@ package s2s
 
 import (
 	"context"
-	"io"
 	"log"
 	"strings"
 	"time"
@@ -17,6 +16,7 @@ type Sentence struct {
 	cont string
 	// position
 	p, wn int
+	Trans string
 }
 
 type Word struct {
@@ -30,7 +30,7 @@ var (
 	splitThreshold = 5
 )
 
-func Recognize(gsUri string, language string, speakerN int) (e error) {
+func Recognize(gsUri string, language string, speakerN int) (result [][]Sentence, e error) {
 	log.Println("Start recognizing...")
 
 	var client *speech.Client
@@ -68,7 +68,6 @@ func Recognize(gsUri string, language string, speakerN int) (e error) {
 	log.Println("Speech to Text finished in", time.Since(pstart), ".")
 
 	var tagThreshold = 1
-	var result [][]Sentence
 	var rcount []int
 	var lst []time.Duration
 	if speakerN == 0 {
@@ -106,7 +105,7 @@ func Recognize(gsUri string, language string, speakerN int) (e error) {
 						result[tag] = append(result[tag], Sentence{
 							w: make([]Word, 0),
 						})
-						log.Println(tag, ":", result[tag][rcount[tag]].cont)
+						//log.Println(tag, ":", result[tag][rcount[tag]].cont)
 						rcount[tag]++
 					}
 				}
@@ -124,28 +123,31 @@ func Recognize(gsUri string, language string, speakerN int) (e error) {
 			}
 		}
 	}
-	for i := 0; i < len(result); i++ {
-		if len(result[i][rcount[i]].cont) != 0 {
-			log.Println(i, ":", result[i][rcount[i]].cont)
-		}
-	}
+	// for i := 0; i < len(result); i++ {
+	// 	if len(result[i][rcount[i]].cont) != 0 {
+	// 		log.Println(i, ":", result[i][rcount[i]].cont)
+	// 	}
+	// }
 
 	return
 }
 
-func (s *Sentence) Pop() error {
-	if s.p++; s.p == s.wn {
-		return io.EOF
-	}
-	return nil
+func (s *Sentence) IsEnd() bool {
+	return s.p == s.wn
 }
 
-func (s *Sentence) GetOneWord() Word {
-	return s.w[s.p]
+func (s *Sentence) Pop() (w Word) {
+	w = s.w[s.p]
+	s.p++
+	return
 }
 
 func (s *Sentence) Content() string {
 	return s.cont
+}
+
+func (s *Sentence) Reset() {
+	s.p = 0
 }
 
 func toDuration(t *duration.Duration) time.Duration {
