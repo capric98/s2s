@@ -42,6 +42,10 @@ func NewYouDao(appKey, appPass string, from, to string) (Translator, error) {
 }
 
 func (t *youdao) Trans(text string) (r string, e error) {
+	if text == "" {
+		return
+	}
+
 	u, _ := uuid.NewUUID()
 	currentT := strconv.FormatInt(time.Now().Unix(), 10)
 
@@ -70,6 +74,7 @@ func (t *youdao) Trans(text string) (r string, e error) {
 		return
 	}
 	if results.ErrCode != "0" {
+		//log.Println("salt:", u.String(), "curtime", currentT, "sign:", t.genSign(text, u.String(), currentT))
 		e = errors.New("Translator: Remote server responses with error code: " + results.ErrCode)
 		return
 	} else {
@@ -85,6 +90,7 @@ func (t *youdao) Trans(text string) (r string, e error) {
 
 func (t *youdao) genSign(text, salt, curtime string) string {
 	signStr := t.appKey + truncate(text) + salt + curtime + t.appPass
+	//log.Println(signStr)
 	checksum := sha256.Sum256([]byte(signStr))
 	return hex.EncodeToString(checksum[:])
 }
@@ -95,7 +101,6 @@ func truncate(text string) string {
 	if l <= 20 {
 		return text
 	}
-	ts := append(rt[:10], []rune(strconv.Itoa(l))...)
-	ts = append(ts, rt[l-10:l]...)
-	return string(ts)
+
+	return string(rt[:10]) + strconv.Itoa(l) + string(rt[l-10:l])
 }

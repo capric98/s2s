@@ -1,7 +1,6 @@
 package s2s
 
 import (
-	"os"
 	"os/exec"
 	"strconv"
 )
@@ -25,8 +24,8 @@ func EncodeToFLAC(file, task string) (e error) {
 		"-ar", strconv.Itoa(SAMPLERATE), "-ac", "2", "-sample_fmt", "s16",
 		"-vn", "-hide_banner", "-y",
 		task)
-	cmd.Stderr = os.Stderr
+	//cmd.Stderr = os.Stderr
 	e = cmd.Run()
-	_, _ = os.Stderr.Write([]byte("\n\n"))
+	//_, _ = os.Stderr.Write([]byte("\n\n"))
 	return
 }

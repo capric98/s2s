@@ -61,8 +61,15 @@ func OutputSubtitle(result [][]Sentence, out string, verbose, withTrans bool) (e
 		speaker := result[k]
 		dia.Style = styles[k%slen].Name
 		for _, sentence := range speaker {
+			if sentence.IsEnd() {
+				// In case of null sentence.
+				continue
+			}
+
 			w = sentence.Pop()
-			dia.End = w.End
+			if dia.End < w.End-minorShift {
+				dia.End = w.End - minorShift
+			}
 			queue := ""
 			for !sentence.IsEnd() {
 				queue += w.C
@@ -92,16 +99,16 @@ func prepText(text, trans string, withTrans bool) string {
 	rt := []rune(text)
 	for len(rt) > maxLineWidth {
 		result = append(result, rt[:maxLineWidth]...)
-		result = append(result, '\n')
+		result = append(result, []rune("\\N")...)
 		rt = rt[maxLineWidth:]
 	}
 	result = append(result, rt...)
 	if withTrans {
-		result = append(result, '\n')
+		result = append(result, []rune("\\N")...)
 		rt = []rune(trans)
 		for len(rt) > maxLineWidth {
 			result = append(result, rt[:maxLineWidth]...)
-			result = append(result, '\n')
+			result = append(result, []rune("\\N")...)
 			rt = rt[maxLineWidth:]
 		}
 		result = append(result, rt...)

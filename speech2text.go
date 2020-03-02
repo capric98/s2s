@@ -65,7 +65,7 @@ func Recognize(gsUri string, language string, speakerN int) (result [][]Sentence
 	pstart := time.Now()
 
 	resp, _ := op.Wait(ctx)
-	log.Println("Speech to Text finished in", time.Since(pstart), ".")
+	log.Printf("Speech to Text finished in %v.\n\n", time.Since(pstart))
 
 	var tagThreshold = 1
 	var rcount []int
