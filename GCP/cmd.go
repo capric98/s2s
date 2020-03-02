@@ -15,6 +15,7 @@ var (
 	bucketName  = flag.String("bucket", "speechtotextbtest", "GCP bucket name")
 	projectID   = flag.String("projID", "", "Your GCP project ID")
 	gcpLan      = flag.String("gLCode", "ja-JP", "GCP speech to text language code")
+	// speakerNum  = flag.Int("num", 0, "The number of speakers. Set this to 0 to disable SpeakerDiarization.")
 	// ydLan       = flag.String("ydCode", "ja", "Youdao API language code")
 	// target      = flag.String("target", "zh-CHS", "Target subtitle language code")
 )
@@ -62,5 +63,5 @@ func main() {
 		log.Panicln("Upload bucket:", err)
 	}
 
-	_ = s2s.Recognize("gs://"+*bucketName+"/"+task, *gcpLan)
+	_ = s2s.Recognize("gs://"+*bucketName+"/"+task, *gcpLan, 3)
 }
