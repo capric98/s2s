@@ -33,7 +33,8 @@ func main() {
 
 	resArgs := flag.Args()
 	if len(resArgs) == 0 {
-		log.Panicln("Please input a media file!")
+		log.Println("Please input a media file!")
+		return
 	}
 	if len(resArgs) > 1 {
 		log.Println("Got more than one input files, emit the latters:", resArgs[1:])
@@ -43,7 +44,8 @@ func main() {
 	file := resArgs[0]
 	if info, err := os.Stat(file); os.IsNotExist(err) {
 		info.Name()
-		log.Panicln(file, "does not exists!")
+		log.Println(file, "does not exists!")
+		return
 	}
 	task := time.Now().Format("20060102-150405-") + filepath.Base(file) + ".flac"
 
@@ -56,32 +58,37 @@ func main() {
 	log.Println("Transcoding...")
 	if err := s2s.EncodeToFLAC(file, task); err != nil {
 		_ = os.Remove(task)
-		log.Panicln(err)
+		log.Println(err)
+		return
 	}
 	defer os.Remove(task)
 
 	buk, err := s2s.OpenBuk(*bucketName, *projectID)
 	if err != nil {
-		log.Panicln("Open bucket:", err)
+		log.Println("Open bucket:", err)
+		return
 	}
 	defer buk.Close()
 
 	fileReader, err := os.Open(task)
 	if err != nil {
 		os.Remove(task)
-		log.Panicln("Open encoded file:", err)
+		log.Println("Open encoded file:", err)
+		return
 	}
 	defer fileReader.Close()
 
 	log.Println("Uploading...")
 	defer func() { _ = buk.Delete(task) }()
 	if err := buk.Upload(task, fileReader); err != nil {
-		log.Panicln("Upload bucket:", err)
+		log.Println("Upload bucket:", err)
+		return
 	}
 
 	r, e := s2s.Recognize("gs://"+*bucketName+"/"+task, *gcpLan, *speakerNum)
 	if e != nil {
-		log.Panicln("Speech to Text:", e)
+		log.Println("Speech to Text:", e)
+		return
 	}
 
 	if *vout != "" || *pout != "" {
