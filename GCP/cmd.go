@@ -28,8 +28,8 @@ var (
 )
 
 func main() {
-	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", *credentials)
 	flag.Parse()
+	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", *credentials)
 
 	resArgs := flag.Args()
 	if len(resArgs) == 0 {

@@ -24,7 +24,7 @@ func OpenBuk(bukname, projectID string) (b *Buk, e error) {
 	b = &Buk{
 		name:      bukname,
 		projectID: projectID,
-		timeout:   5 * time.Second,
+		timeout:   30 * time.Second,
 	}
 	b.ctx, b.cancel = context.WithCancel(context.Background())
 	b.client, e = storage.NewClient(b.ctx)
@@ -60,8 +60,11 @@ func (b *Buk) Upload(obj string, r io.Reader) (e error) {
 	ec := make(chan error)
 	go func() {
 		var err error
+		// var n, count int64
+		// defer func() { log.Println("Total Upload:", count/1024/1024, "MB") }()
 		for {
 			_, err = io.CopyN(wc, r, 64*1024)
+			// count += n
 			select {
 			case <-ctx.Done():
 				return
