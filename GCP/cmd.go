@@ -14,10 +14,12 @@ var (
 	credentials = flag.String("cred", "credentials.json", "Google Application credentials file")
 	bucketName  = flag.String("bucket", "yas2ttool", "GCP bucket name")
 	projectID   = flag.String("projID", "", "Your GCP project ID (only used to create bucket if not exist)")
-	gcpLan      = flag.String("gLCode", "ja-JP", "GCP speech to text language code")
+	gcpLan      = flag.String("gLCode", "ja-JP", "GCP speech to text language code(https://cloud.google.com/speech-to-text/docs/languages)")
 	speakerNum  = flag.Int("num", 0, "The number of speakers. Set this to 0 to disable SpeakerDiarization")
-	ydLan       = flag.String("ydCode", "ja", "Youdao API language code")
+	ydLan       = flag.String("ydCode", "ja", "Youdao API language code(https://ai.youdao.com/DOCSIRMA/html/自然语言翻译/API文档/文本翻译服务/文本翻译服务-API文档.html)")
 	target      = flag.String("target", "zh-CHS", "Target subtitle language code")
+	fnmoji      = flag.Bool("fnmoji", false, "汉字false...")
+	tnmoji      = flag.Bool("tnmoji", false, "汉字false...")
 
 	appKey  = flag.String("appKey", "", "Youdao API appKey")
 	appPass = flag.String("appPass", "", "Youdao API appPass")
@@ -85,7 +87,7 @@ func main() {
 		return
 	}
 
-	r, e := s2s.Recognize("gs://"+*bucketName+"/"+task, *gcpLan, *speakerNum)
+	r, e := s2s.Recognize("gs://"+*bucketName+"/"+task, *gcpLan, *speakerNum, !*fnmoji)
 	if e != nil {
 		log.Println("Speech to Text:", e)
 		return
@@ -97,21 +99,21 @@ func main() {
 
 	if *vout != "" {
 		log.Println("Write verbose out to", *vout)
-		e = s2s.OutputSubtitle(r, *vout, true, true)
+		e = s2s.OutputSubtitle(r, *vout, true, true, !*fnmoji, !*tnmoji)
 		if e != nil {
 			log.Println("Verbose out:", e)
 		}
 	}
 	if *pout != "" {
 		log.Println("Write plain out to", *pout)
-		e = s2s.OutputSubtitle(r, *pout, false, true)
+		e = s2s.OutputSubtitle(r, *pout, false, true, !*fnmoji, !*tnmoji)
 		if e != nil {
 			log.Println("Plain out:", e)
 		}
 	}
 	if *rout != "" {
 		log.Println("Write raw out to", *rout)
-		e = s2s.OutputSubtitle(r, *rout, false, false)
+		e = s2s.OutputSubtitle(r, *rout, false, false, !*fnmoji, !*tnmoji)
 		if e != nil {
 			log.Println("Raw out:", e)
 		}

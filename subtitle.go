@@ -38,7 +38,7 @@ func initStyle() {
 	slen = len(styles)
 }
 
-func OutputSubtitle(result [][]Sentence, out string, verbose, withTrans bool) (e error) {
+func OutputSubtitle(result [][]Sentence, out string, verbose, withTrans, fmoji, tmoji bool) (e error) {
 	initStyle()
 
 	fo, e := os.Create(out)
@@ -73,10 +73,13 @@ func OutputSubtitle(result [][]Sentence, out string, verbose, withTrans bool) (e
 			queue := ""
 			for !sentence.IsEnd() {
 				queue += w.C
+				if !fmoji {
+					queue += " "
+				}
 				if verbose {
 					dia.Start = dia.End
 					dia.End = w.End
-					dia.Text = prepText(queue, sentence.Trans, withTrans)
+					dia.Text = prepText(queue, sentence.Trans, withTrans, fmoji, tmoji)
 					dia.writeTo(fo)
 				}
 				w = sentence.Pop()
@@ -84,7 +87,7 @@ func OutputSubtitle(result [][]Sentence, out string, verbose, withTrans bool) (e
 			queue += w.C
 			dia.Start = dia.End
 			dia.End = w.End + minorShift
-			dia.Text = prepText(queue, sentence.Trans, withTrans)
+			dia.Text = prepText(queue, sentence.Trans, withTrans, fmoji, tmoji)
 			dia.writeTo(fo)
 
 			sentence.Reset()
@@ -94,22 +97,32 @@ func OutputSubtitle(result [][]Sentence, out string, verbose, withTrans bool) (e
 	return
 }
 
-func prepText(text, trans string, withTrans bool) string {
+func prepText(text, trans string, withTrans, fmoji, tmoji bool) string {
+	var fd, td = 1, 1
+	var fds, tds = "\\N", "\\N"
+	if !fmoji {
+		fd = 2
+		fds = "-\\N"
+	}
+	if !tmoji {
+		td = 2
+		tds = "-\\N"
+	}
 	result := []rune{}
 	rt := []rune(text)
-	for len(rt) > maxLineWidth {
-		result = append(result, rt[:maxLineWidth]...)
-		result = append(result, []rune("\\N")...)
-		rt = rt[maxLineWidth:]
+	for len(rt) > maxLineWidth*fd {
+		result = append(result, rt[:maxLineWidth*fd]...)
+		result = append(result, []rune(fds)...)
+		rt = rt[maxLineWidth*fd:]
 	}
 	result = append(result, rt...)
 	if withTrans {
 		result = append(result, []rune("\\N")...)
 		rt = []rune(trans)
-		for len(rt) > maxLineWidth {
-			result = append(result, rt[:maxLineWidth]...)
-			result = append(result, []rune("\\N")...)
-			rt = rt[maxLineWidth:]
+		for len(rt) > maxLineWidth*td {
+			result = append(result, rt[:maxLineWidth*td]...)
+			result = append(result, []rune(tds)...)
+			rt = rt[maxLineWidth*td:]
 		}
 		result = append(result, rt...)
 	}

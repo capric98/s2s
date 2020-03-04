@@ -30,7 +30,7 @@ var (
 	splitThreshold = 5
 )
 
-func Recognize(gsUri string, language string, speakerN int) (result [][]Sentence, e error) {
+func Recognize(gsUri string, language string, speakerN int, moji bool) (result [][]Sentence, e error) {
 	log.Println("Start recognizing...")
 
 	var client *speech.Client
@@ -112,6 +112,9 @@ func Recognize(gsUri string, language string, speakerN int) (result [][]Sentence
 				lst[tag] = end
 
 				//log.Println(word)
+				if !moji {
+					result[tag][rcount[tag]].cont += " "
+				}
 				result[tag][rcount[tag]].cont += word
 				result[tag][rcount[tag]].wn++
 				result[tag][rcount[tag]].w = append(result[tag][rcount[tag]].w,
